@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+      
+<html lang="en">
+    <head>
+        <meta name="viewport" content="initial-scale=1, width=device-width" charset="UTF-8">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        
+        <title>Weather</title>
+        <style>
+            #weather-info{
+                text-align:center;
+            }
+
+            p{
+                font-size:18px;
+            }
+        </style>
+        <script>
+            function displayInfo(info){
+                // create html element with the weather info
+                if (info.cod !== 200){
+                    return  `
+                    <h1>Please enter a valid City</h>
+                    `
+                }
+                return `
+                <div class="container">
+                    <h1><img src="http://openweathermap.org/img/wn/${info.weather[0].icon}@2x.png">${info.main.temp.toFixed(1)}°C  ${info.weather[0].description} </h1>
+                    <h3>${info.name}, ${info.sys.country}.  Local Time: ${new Date(info.dt * 1000).toLocaleTimeString("default")}</h3>
+                    <br>
+                    <p>Feels like: ${info.main.feels_like.toFixed(1)}°C</p>
+                    <p>Min Temp : ${info.main.temp_min.toFixed(1)}°C   /   Max Temp: ${info.main.temp_max.toFixed(1)}°C</p>
+                    <p>Condition: ${info.weather[0].main}<p>
+                    <p>Clouds: ${info.clouds.all}%</p>
+                    <p>Humidity: ${info.main.humidity} % </p>
+                    <p>Wind: ${(info.wind.speed * 3.6).toFixed(1) } KM/H  / Direction: ${info.wind.deg}°   / Gust: ${info.wind.gust = info.wind.gust ? (info.wind.gust * 3.6).toFixed(1) : 0 } KM/H </p>
+                    <p>Visibility: ${(info.visibility / 1000).toFixed(1)} KM</p>
+                    <br>
+                </div>
+                `// closing
+            };
+
+            // get geolocation and validate if value exists
+            function getLocation() {
+                if (navigator.geolocation) {
+                    position = navigator.geolocation.getCurrentPosition(function(position){
+                        lat = position.coords.latitude;
+                        lon = position.coords.longitude;
+                        var pos = "lat=" + lat + "&lon=" + lon
+                        
+                        //make request
+                    fetch('/current?' + pos , {
+                        method: 'GET',
+                        credentials: 'include',
+                        cache: 'no-cache',
+                        headers: new Headers({
+                        "content-type": "application"
+                        })
+                    })
+                    .then(function (response){
+                        if(response.status !== 200) {
+                        console.log("Response status was not 200: " + response.status);
+                        return ;
+                        }
+                        response.json().then(function(data){
+                            // get html element with weather info, then render it to weather-info 
+                            element = displayInfo(data);
+                            document.getElementById("weather-info").innerHTML = element;
+                        })
+                    }) 
+                    });
+                } else {
+                  document.getElementById("weather-info").innerHTML = "<p>Geolocation is not supported by this browser, use the search city function.</p>";
+                }
+            };    
+
+            getLocation();
+
+            function getInfo(){
+                // request city to /weather, then pass the result to displayInfo
+                city = document.forms["form"]["city"].value;
+                if (city !== ""){
+                    //make request
+                    fetch('/weather?city=' + city , {
+                        method: 'GET',
+                        credentials: 'include',
+                        cache: 'no-cache',
+                        headers: new Headers({
+                        "content-type": "application"
+                        })
+                    })
+                    .then(function (response){
+                        if(response.status !== 200) {
+                        console.log("Response status was not 200: 0" + response.status);
+                        return ;
+                        }
+                        response.json().then(function(data){
+                            // get html element with weather info, then render it to weather-info 
+                            element = displayInfo(data);
+                            document.querySelector("input").value = ''
+                            document.getElementById("weather-info").innerHTML = element;
+                        })
+                    })
+                }
+            }  
+            document.addEventListener("submit", function(event){
+                event.preventDefault();
+                getInfo();
+
+            } )
+
+            document.addEventListener("click", function(event){
+                event.preventDefault();
+                getInfo();
+
+            } )
+        </script>
+    </head>
+    <body >
+        {% block body %}
+        {% endblock %}
+    </body>
+</html>        

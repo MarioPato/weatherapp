@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+        
+    {% block body %}
+        <div class="container"> 
+            <div clas="jumbotron">
+                <br> 
+                <form name="form" id="form">
+                    <div class="input-group col-xs-6 col-xs-offset-3">
+                        <input type="text" id="input" class="form-control" name="city" placeholder="Enter your City">
+                        <div class="input-group-btn">
+                            <button type="button" preventDefault  class="btn btn-default" ><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+                <br>
+                <div id="weather-info" class="card">
+
+                </div>
+            </div>
+        </div>
+    {% endblock %}    
